@@ -3060,8 +3060,16 @@ namespace Play::Render
 	void ClearRenderTarget( Pixel colour ) 
 	{
 		ASSERT_RENDERTARGET;
+		static std::vector<Pixel> row = { colour };
+		
+		if (row[0].bits != colour.bits || row.size() != m_pRenderTarget->width)
+		{
+			row.assign(m_pRenderTarget->width, colour);
+		}
+
 		Pixel* pBuffEnd = m_pRenderTarget->pPixels + (m_pRenderTarget->width * m_pRenderTarget->height);
-		for (Pixel* pBuff = m_pRenderTarget->pPixels; pBuff < pBuffEnd; *pBuff++ = colour.bits);
+		for (Pixel* pBuff = m_pRenderTarget->pPixels; pBuff < pBuffEnd; pBuff += m_pRenderTarget->width)
+			memcpy(pBuff, row.data(), sizeof(Pixel) * m_pRenderTarget->width);
 		m_pRenderTarget->preMultiplied = false;
 	}
 
